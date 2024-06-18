@@ -7,14 +7,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SimpleTask implements Task {
     private int priority;
+    private final int delayTime;
     private final AtomicBoolean executed;
 
-    public SimpleTask() {
+    public SimpleTask(int delayTime) {
         this.executed = new AtomicBoolean(false);
+        this.delayTime = delayTime;
     }
 
     @Override
     public void perform() {
+        try {
+            Thread.sleep(delayTime);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         executed.set(true);
     }
 

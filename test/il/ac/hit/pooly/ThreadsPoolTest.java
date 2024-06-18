@@ -8,7 +8,7 @@ import org.junit.Test;
  */
 public class ThreadsPoolTest {
 
-    private final int delayTime = 100;
+    private final int delayTime = 200;
 
     /**
      * Tests the submission of a single task.

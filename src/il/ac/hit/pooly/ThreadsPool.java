@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * Manages a pool of threads to execute tasks based on priority.
  */
 public class ThreadsPool {
-    final ExecutorService executor;
+    private final ExecutorService executor;
     private final PriorityBlockingQueue<Task> taskQueue;
 
     /**
@@ -35,10 +35,11 @@ public class ThreadsPool {
         for (int i = 0; i < ((ThreadPoolExecutor) executor).getCorePoolSize(); i++) {
             executor.submit(() -> {
                 try {
-                    while (!Thread.currentThread().isInterrupted()) {
+                    do {
                         Task task = taskQueue.take();
                         task.perform();
                     }
+                    while(!Thread.currentThread().isInterrupted());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -51,5 +52,14 @@ public class ThreadsPool {
      */
     public void shutdown() {
         executor.shutdownNow();
+    }
+
+    /**
+     * Returns shutdown state.
+     * @return <code>true</code> if the ThreadsPool was Shutdown
+     *         <code>false</code> otherwise.
+     */
+    public boolean isShutdown() {
+        return executor.isShutdown();
     }
 }

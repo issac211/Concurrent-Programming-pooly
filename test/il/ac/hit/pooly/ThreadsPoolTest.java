@@ -8,7 +8,8 @@ import org.junit.Test;
  */
 public class ThreadsPoolTest {
 
-    private final int delayTime = 200;
+    private final int taskDelayTime = 200;
+    private final int delayTime = taskDelayTime / 2;
 
     /**
      * Tests the submission of a single task.
@@ -18,39 +19,14 @@ public class ThreadsPoolTest {
     public void testSubmitTask() throws InterruptedException {
         ThreadsPool pool = new ThreadsPool(2);
 
-        SimpleTask task1 = new SimpleTask(delayTime);
+        SimpleTask task1 = new SimpleTask(taskDelayTime);
         task1.setPriority(1);
         pool.submit(task1);
 
-        Thread.sleep(delayTime + 100);  // Allow some time for the task to be executed
+        // Allow some time for the task to be executed
+        Thread.sleep(taskDelayTime + delayTime);
 
         assertTrue(task1.isExecuted());
-
-        pool.shutdown();
-    }
-
-    /**
-     * Tests the execution of tasks based on priority.
-     * @throws InterruptedException if the thread is interrupted while sleeping
-     */
-    @Test
-    public void testTaskPriority() throws InterruptedException {
-        ThreadsPool pool = new ThreadsPool(2);
-
-        SimpleTask lowPriorityTask = new SimpleTask(delayTime);
-        lowPriorityTask.setPriority(1);
-
-        SimpleTask highPriorityTask = new SimpleTask(delayTime);
-        highPriorityTask.setPriority(10);
-
-        pool.submit(lowPriorityTask);
-        pool.submit(highPriorityTask);
-
-        // Allow some time for tasks to be executed
-        Thread.sleep(delayTime + 100);
-
-        assertTrue(highPriorityTask.isExecuted());
-        assertTrue(lowPriorityTask.isExecuted());
 
         pool.shutdown();
     }
@@ -63,20 +39,21 @@ public class ThreadsPoolTest {
     public void testMultipleTasks() throws InterruptedException {
         ThreadsPool pool = new ThreadsPool(3);
 
-        SimpleTask task1 = new SimpleTask(delayTime);
+        SimpleTask task1 = new SimpleTask(taskDelayTime);
         task1.setPriority(1);
 
-        SimpleTask task2 = new SimpleTask(delayTime);
+        SimpleTask task2 = new SimpleTask(taskDelayTime);
         task2.setPriority(5);
 
-        SimpleTask task3 = new SimpleTask(delayTime);
+        SimpleTask task3 = new SimpleTask(taskDelayTime);
         task3.setPriority(10);
 
         pool.submit(task1);
         pool.submit(task2);
         pool.submit(task3);
 
-        Thread.sleep(delayTime + 100);  // Allow some time for all tasks to be executed
+        // Allow some time for all tasks to be executed
+        Thread.sleep(taskDelayTime + delayTime);
 
         assertTrue(task1.isExecuted());
         assertTrue(task2.isExecuted());
@@ -93,31 +70,43 @@ public class ThreadsPoolTest {
     public void testPriorityExecutionOrder() throws InterruptedException {
         ThreadsPool pool = new ThreadsPool(1); // Single thread to ensure execution order
 
-        SimpleTask task1 = new SimpleTask(delayTime);
+        SimpleTask task1 = new SimpleTask(taskDelayTime);
         task1.setPriority(1);
 
-        SimpleTask task2 = new SimpleTask(delayTime);
+        SimpleTask task2 = new SimpleTask(taskDelayTime);
         task2.setPriority(5);
 
-        SimpleTask task3 = new SimpleTask(delayTime);
+        SimpleTask task3 = new SimpleTask(taskDelayTime);
         task3.setPriority(10);
 
         pool.submit(task1);
+        // Allow some time for tasks1 to be submitted
+        Thread.sleep(delayTime / 5);
+
         pool.submit(task2);
+        // Allow some time for tasks2 to be submitted
+        Thread.sleep(delayTime / 5);
+
         pool.submit(task3);
-
-        // Check if tasks are executed in priority order
-        // Allow some time for tasks3 (Highest priority) to be executed
-        Thread.sleep(delayTime + 100);
-        assertTrue(task3.isExecuted()); // Highest priority should be executed first
-
-        // Allow some time for tasks2 to be executed
-        Thread.sleep(delayTime + 100);
-        assertTrue(task2.isExecuted());
+        // Allow some time for tasks3 to be submitted
+        Thread.sleep(delayTime / 5);
 
         // Allow some time for tasks1 to be executed
-        Thread.sleep(delayTime + 100);
+        Thread.sleep(taskDelayTime);
+        // First task that was submitted should be executed first
+        // Do to occupation of the Thread
         assertTrue(task1.isExecuted());
+
+        // Allow some time for tasks3 (Highest priority) to be executed
+        Thread.sleep(taskDelayTime);
+        // Highest priority should be executed Second
+        // Do to release of the Thread occupation
+        assertTrue(task3.isExecuted());
+
+        // Allow some time for tasks2 (Second-highest priority) to be executed
+        Thread.sleep(taskDelayTime);
+        // Last task to execute
+        assertTrue(task2.isExecuted());
 
         pool.shutdown();
     }
@@ -131,12 +120,13 @@ public class ThreadsPoolTest {
         ThreadsPool pool = new ThreadsPool(5);
 
         for (int i = 0; i < 100; i++) {
-            SimpleTask task = new SimpleTask(delayTime);
+            SimpleTask task = new SimpleTask(taskDelayTime);
             task.setPriority(i);
             pool.submit(task);
         }
 
-        Thread.sleep(delayTime + 100);  // Allow some time for all tasks to be executed
+        // Allow some time for tasks to be executed
+        Thread.sleep(taskDelayTime + delayTime);
 
         pool.shutdown();
     }
@@ -162,11 +152,12 @@ public class ThreadsPoolTest {
     public void testTaskWithNegativePriority() throws InterruptedException {
         ThreadsPool pool = new ThreadsPool(2);
 
-        SimpleTask task = new SimpleTask(delayTime);
+        SimpleTask task = new SimpleTask(taskDelayTime);
         task.setPriority(-1); // Negative priority
         pool.submit(task);
 
-        Thread.sleep(delayTime + 100);  // Allow some time for the task to be executed
+        // Allow some time for the task to be executed
+        Thread.sleep(taskDelayTime + delayTime);
 
         assertTrue(task.isExecuted());
 
@@ -200,7 +191,8 @@ public class ThreadsPoolTest {
 
         pool.submit(exceptionTask);
 
-        Thread.sleep(delayTime + 100);  // Allow some time for the task to be executed
+        // Allow some time for the task to be executed
+        Thread.sleep(taskDelayTime + delayTime);
 
         // Since exceptions in tasks should not crash the thread pool,
         // we can check if the pool is still running

@@ -35,10 +35,11 @@ public class ThreadsPool {
         for (int i = 0; i < ((ThreadPoolExecutor) executor).getCorePoolSize(); i++) {
             executor.submit(() -> {
                 try {
-                    while (!Thread.currentThread().isInterrupted()) {
+                    do {
                         Task task = taskQueue.take();
                         task.perform();
                     }
+                    while(!Thread.currentThread().isInterrupted());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

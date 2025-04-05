@@ -19,7 +19,6 @@ This project implements a **Thread Pool with Priority**, designed to efficiently
 - **Java** – main programming language.
 - **Java Concurrency API** – including `ExecutorService`, `ThreadPoolExecutor`, and `PriorityBlockingQueue`.
 - **JUnit** – for unit testing.
-- **AtomicBoolean** – for thread-safe task execution verification.
 
 ## Example Usage
 
